@@ -1,4 +1,4 @@
-use poem::{web::Data, error::InternalServerError};
+use poem::{web::Data, error::InternalServerError, Result};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object};
 use sqlx::SqlitePool;
 
@@ -9,7 +9,7 @@ pub struct Todo {
     done: bool,
 }
 
-pub type TodoResponse = Result<Json<Vec<Todo>>, dyn std::error::Error>;
+pub type TodoResponse = Result<Json<Vec<Todo>>>;
 
 pub struct TodosApi;
 

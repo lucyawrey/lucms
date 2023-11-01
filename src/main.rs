@@ -3,15 +3,16 @@ mod todo;
 
 use hello::HelloApi;
 use todo::TodosApi;
-use poem::{listener::TcpListener, Route, Server};
+use poem::{listener::TcpListener, Route, Server, EndpointExt};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
+use std::error::Error;
 
 const DB_FILENAME: &str = "sqlite:todos.db";
 
 #[tokio::main]
 async fn main()
-    -> Result<(), Box<dyn std::error::Error>> {
+    -> Result<(), Box<dyn Error>> {
 
     color_eyre::install()?;
 
