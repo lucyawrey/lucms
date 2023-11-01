@@ -1,15 +1,13 @@
-use poem::{web::Data, error::InternalServerError, Result};
+use poem::{error::InternalServerError, Result, web::Data};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object};
 use sqlx::SqlitePool;
 
 #[derive(Object)]
-pub struct Todo {
+struct Todo {
     id: i64,
     description: String,
     done: bool,
 }
-
-pub type TodoResponse = Result<Json<Vec<Todo>>>;
 
 pub struct TodosApi;
 
@@ -35,7 +33,7 @@ impl TodosApi {
 
     #[oai(path = "/", method = "get")]
     async fn get_all(&self, pool: Data<&SqlitePool>
-    ) -> TodoResponse {
+    ) -> Result<Json<Vec<Todo>>> {
         let todos = sqlx::query_as!(
 	        Todo, 
 	        "SELECT * FROM todos"
