@@ -1,3 +1,7 @@
+use poem::{web::Data, error::InternalServerError};
+use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object};
+use sqlx::SqlitePool;
+
 #[derive(Object)]
 pub struct Todo {
     id: i64,
@@ -5,7 +9,7 @@ pub struct Todo {
     done: bool,
 }
 
-pub type TodoResponse = Result<Json<Vec<Todo>>>;
+pub type TodoResponse = Result<Json<Vec<Todo>>, dyn std::error::Error>;
 
 pub struct TodosApi;
 

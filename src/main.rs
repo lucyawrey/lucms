@@ -5,7 +5,7 @@ use hello::HelloApi;
 use todo::TodosApi;
 use poem::{listener::TcpListener, Route, Server};
 use poem_openapi::OpenApiService;
-use sqlx::{SqlitePool, Sqlite, migrate::MigrateDatabase};
+use sqlx::SqlitePool;
 
 const DB_FILENAME: &str = "sqlite:todos.db";
 
@@ -15,7 +15,6 @@ async fn main()
 
     color_eyre::install()?;
 
-    try_create_db(DB_FILENAME).await;
     let db_pool = 
 	    SqlitePool::connect(DB_FILENAME).await?;
 
@@ -42,16 +41,4 @@ async fn main()
         .await;
 
     Ok(())
-}
-
-async fn try_create_db(db_filename: &str) {
-    if !Sqlite::database_exists(db_filename).await.unwrap_or(false) {
-        println!("Creating database {}", db_filename);
-        match Sqlite::create_database(db_filename).await {
-            Ok(_) => println!("Create db success"),
-            Err(error) => panic!("error: {}", error),
-        }
-    } else {
-        println!("Database already exists");
-    }
 }
