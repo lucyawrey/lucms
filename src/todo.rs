@@ -1,17 +1,17 @@
 #[derive(Object)]
-struct Todo {
+pub struct Todo {
     id: i64,
     description: String,
     done: bool,
 }
 
-type TodoResponse = Result<Json<Vec<Todo>>>;
+pub type TodoResponse = Result<Json<Vec<Todo>>>;
 
-struct TodosApi;
+pub struct TodosApi;
 
 #[OpenApi]
 impl TodosApi {
-    #[oai(path = "/todos", method = "post")]
+    #[oai(path = "/", method = "post")]
     async fn create(
         &self,
         pool: Data<&SqlitePool>,
@@ -29,7 +29,7 @@ impl TodosApi {
         Ok(Json(id))
     }
 
-    #[oai(path = "/todos", method = "get")]
+    #[oai(path = "/", method = "get")]
     async fn get_all(&self, pool: Data<&SqlitePool>
     ) -> TodoResponse {
         let todos = sqlx::query_as!(
