@@ -13,7 +13,7 @@ pub struct TodosApi;
 
 #[OpenApi]
 impl TodosApi {
-    #[oai(path = "/", method = "post")]
+    #[oai(path = "/todo", method = "post")]
     async fn create(
         &self,
         pool: Data<&SqlitePool>,
@@ -31,7 +31,7 @@ impl TodosApi {
         Ok(Json(id))
     }
 
-    #[oai(path = "/", method = "get")]
+    #[oai(path = "/todo", method = "get")]
     async fn get_all(&self, pool: Data<&SqlitePool>
     ) -> Result<Json<Vec<Todo>>> {
         let todos = sqlx::query_as!(

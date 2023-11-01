@@ -3,10 +3,12 @@ mod todo;
 
 use hello::HelloApi;
 use todo::TodosApi;
-use poem::{listener::TcpListener, Route, Server, EndpointExt};
+use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
 use std::error::Error;
+
+const API_SET: (HelloApi, TodosApi) = (HelloApi, TodosApi);
 
 const DB_FILENAME: &str = "sqlite:todos.db";
 
@@ -19,22 +21,17 @@ async fn main()
     let db_pool = 
 	    SqlitePool::connect(DB_FILENAME).await?;
 
-    let hello_api_service =
-        OpenApiService::new(HelloApi, "Hello API", "1.0.0")
-        .server("http://localhost:3000");
-    
-    let todos_api_service = 
-	    OpenApiService::new(TodosApi, "Todos API", "1.0.0")
-	    .server("http://localhost:3000/todos");
+    let api_service =
+        OpenApiService::new(API_SET, "LuCMS API (in R&D phase)", "1.0.0")
+        .server("http://localhost:3000/api");
 
-    let hello_ui = hello_api_service.openapi_explorer();
-    let todos_ui = todos_api_service.openapi_explorer();
+    let docs_service = api_service.openapi_explorer();
 
     let app = Route::new()
-        .nest("/", hello_api_service)
-        .nest("/docs", hello_ui)
-        .nest("/todos", todos_api_service)
-        .nest("/todos/docs", todos_ui)
+        //.nest("/", Redirect::temporary("/admin"))
+        .nest("/api", api_service)
+        .nest("/docs", docs_service)
+        .nest("/admin", StaticFilesEndpoint::new("./static").show_files_listing().index_file("index.html"))
         .data(db_pool);
 
     let _ = Server::new(TcpListener::bind("localhost:3000"))
