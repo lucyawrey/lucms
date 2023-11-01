@@ -1,2 +1,7 @@
+# Rust build directory
 /target
+
+# SQLite db files
 *.db
+*.db-shm
+*.db-wal
