@@ -10,7 +10,7 @@ use std::error::Error;
 
 const API_SET: (HelloApi, TodosApi) = (HelloApi, TodosApi);
 
-const DB_FILENAME: &str = "sqlite:todos.db";
+const DB_FILENAME: &str = "sqlite:lucms.db";
 
 #[tokio::main]
 async fn main()
