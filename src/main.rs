@@ -3,7 +3,7 @@ mod todo;
 
 use hello::HelloApi;
 use todo::TodosApi;
-use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint};
+use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint, handler, get};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
 use std::error::Error;
@@ -28,15 +28,22 @@ async fn main()
     let docs_service = api_service.openapi_explorer();
 
     let app = Route::new()
-        //.nest("/", Redirect::temporary("/admin"))
+        .nest("/", get(index_handler_redirect))
         .nest("/api", api_service)
         .nest("/docs", docs_service)
         .nest("/admin", StaticFilesEndpoint::new("./static").show_files_listing().index_file("index.html"))
         .data(db_pool);
+
+    
 
     let _ = Server::new(TcpListener::bind("localhost:3000"))
         .run(app)
         .await;
 
     Ok(())
+}
+
+#[handler]
+async fn index_handler_redirect() -> Redirect {
+    Redirect::temporary("/admin")
 }
