@@ -6,20 +6,21 @@ use todo::TodosApi;
 use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint, handler, get};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
-use std::error::Error;
+use std::{error::Error, env};
 
 const API_SET: (HelloApi, TodosApi) = (HelloApi, TodosApi);
 
-const DB_FILENAME: &str = "sqlite:lucms.db";
 
 #[tokio::main]
 async fn main()
     -> Result<(), Box<dyn Error>> {
 
     color_eyre::install()?;
+    dotenvy::dotenv().expect("No .env file found.");
+    let database_url = env::var("DATABASE_URL").expect("Enviornment variable DATABASE_URL not found.");
 
     let db_pool = 
-	    SqlitePool::connect(DB_FILENAME).await?;
+	    SqlitePool::connect(&database_url).await?;
 
     let api_service =
         OpenApiService::new(API_SET, "LuCMS API (in R&D phase)", "1.0.0")

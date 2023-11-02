@@ -8,6 +8,7 @@ Experimental Rust-based headless CMS.
 ## Getting Started
 - Clone the repo.
 - Follow the steps below to make sure you have a working `lucms.db` SQLite file.
+- Make sure you have a `.env` file containing the `DATABASE_URL` variable or else the program won't run. As of now, this is checked in as it contains no secrets.
 - Run `cargo run` to start the project.
 
 ## SQLite Database Setup with SQLx

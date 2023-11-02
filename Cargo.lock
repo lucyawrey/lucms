@@ -990,6 +990,7 @@ name = "lucms"
 version = "0.1.0"
 dependencies = [
  "color-eyre",
+ "dotenvy",
  "poem",
  "poem-openapi",
  "sqlx",
