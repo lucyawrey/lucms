@@ -17,14 +17,16 @@ async fn main()
 
     color_eyre::install()?;
     dotenvy::dotenv().expect("No .env file found.");
+
     let database_url = env::var("DATABASE_URL").expect("Enviornment variable DATABASE_URL not found.");
+    let host = env::var("HOST").expect("Enviornment variable HOST not found.");
 
     let db_pool = 
 	    SqlitePool::connect(&database_url).await?;
 
     let api_service =
         OpenApiService::new(API_SET, "LuCMS API (in R&D phase)", "1.0.0")
-        .server("http://localhost:3000/api");
+        .server(format!("http://{host}/api"));
 
     let docs_service = api_service.openapi_explorer();
 
@@ -35,9 +37,9 @@ async fn main()
         .nest("/admin", StaticFilesEndpoint::new("./static").show_files_listing().index_file("index.html"))
         .data(db_pool);
 
-    
+    println!("\n🚀 starting server at url: http://{host}");
 
-    let _ = Server::new(TcpListener::bind("localhost:3000"))
+    let _ = Server::new(TcpListener::bind(host))
         .run(app)
         .await;
 
