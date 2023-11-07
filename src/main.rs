@@ -37,7 +37,7 @@ async fn main()
         .nest("/admin", StaticFilesEndpoint::new("./static").show_files_listing().index_file("index.html"))
         .data(db_pool);
 
-    println!("\n🚀 starting server at url: http://{host}");
+    println!("\n🚀 starting server at url: http://{host}\n");
 
     let _ = Server::new(TcpListener::bind(host))
         .run(app)
