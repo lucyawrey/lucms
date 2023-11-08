@@ -1,8 +1,10 @@
 use std::fmt::{Write, Display};
 
-use poem::{error::InternalServerError, Result, web::Data};
+use poem::{error::{InternalServerError, BadRequest}, Result, web::Data};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object, param::Path};
 use sqlx::SqlitePool;
+
+use crate::utilities::StrError;
 
 /// Todo
 #[derive(Object)]
@@ -64,27 +66,29 @@ impl TodosApi {
         id: Path<i64>,
         update: Json<UpdateTodo>,
     ) -> Result<()> {
-        let _set_query_string = get_set_query_string_from_options(vec![
+        let query_string_option = get_set_query_string_from_options(vec![
             opt_col_new("description", &update.description),
             opt_col_new("done", &update.done),
         ]);
 
-        sqlx::query!(
-            "UPDATE todos SET (description) = \"TEST\" WHERE id = ?",
-            id.0
-        )
-        .bind(id.0)
-            .execute(pool.0)
-            .await
-            .map_err(InternalServerError)?;
-        Ok(())
+        if let Some(set_query_string) = query_string_option {
+            sqlx::query("UPDATE todos ? WHERE (id) = ?")
+                .bind(set_query_string)
+                .bind(id.0)
+                .execute(pool.0)
+                .await
+                .map_err(InternalServerError)?;
+            Ok(())
+        } else {
+            Err(BadRequest(StrError::new("test")))
+        }
     }
 }
 
-type OptionalColumn = Option<(String, Box<dyn Display>)>;
+type OptionalColumn<'a> = Option<(String, Box<dyn Display + 'a>)>;
 
-fn opt_col_new<T: Display>(name: &str, option: &Option<T>)
-    -> OptionalColumn {
+fn opt_col_new<'a, T: Display>(name: &str, option: &'a Option<T>)
+    -> OptionalColumn<'a> {
     match option {
         Some(val) => Some((name.to_string(), Box::new(val))),
         None => None,
@@ -100,7 +104,7 @@ fn get_set_query_string_from_options(
             if any {
                 query_string.write_str(", ").unwrap()
             };
-            write!(query_string, "({name}) = ({val})").unwrap();
+            write!(query_string, "({name}) = \"{val}\"").unwrap();
             any = true;
         }
     }

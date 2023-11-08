@@ -1,5 +1,6 @@
 mod hello;
 mod todo;
+mod utilities;
 
 use hello::HelloApi;
 use todo::TodosApi;
@@ -9,7 +10,6 @@ use sqlx::SqlitePool;
 use std::{error::Error, env};
 
 const API_SET: (HelloApi, TodosApi) = (HelloApi, TodosApi);
-
 
 #[tokio::main]
 async fn main()
