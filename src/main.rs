@@ -3,10 +3,10 @@ mod todo;
 mod utilities;
 
 use hello::HelloApi;
-use todo::TodosApi;
 use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint, handler, get};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
+use todo::TodosApi;
 use std::{error::Error, env};
 
 const API_SET: (HelloApi, TodosApi) = (HelloApi, TodosApi);

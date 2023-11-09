@@ -1,10 +1,7 @@
-use std::fmt::{Write, Display};
-
 use poem::{error::{InternalServerError, BadRequest}, Result, web::Data};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object, param::Path};
-use sqlx::SqlitePool;
-
-use crate::utilities::StrError;
+use sqlx::{SqlitePool, QueryBuilder, Sqlite};
+use crate::utilities::{StrError, push_query_set_list, new_set_option};
 
 /// Todo
 #[derive(Object)]
@@ -66,51 +63,25 @@ impl TodosApi {
         id: Path<i64>,
         update: Json<UpdateTodo>,
     ) -> Result<()> {
-        let query_string_option = get_set_query_string_from_options(vec![
-            opt_col_new("description", &update.description),
-            opt_col_new("done", &update.done),
+        let mut query_builder: QueryBuilder<Sqlite> =
+            QueryBuilder::new("UPDATE todos SET ");
+
+        let any = push_query_set_list(&mut query_builder, vec![
+            new_set_option("description", &update.description),
+            new_set_option("done", &update.done),
         ]);
 
-        if let Some(set_query_string) = query_string_option {
-            let sql = format!("UPDATE todos {set_query_string} WHERE (id) = ?");
-            sqlx::query(&sql)
-                .bind(id.0)
-                .execute(pool.0)
-                .await
-                .map_err(InternalServerError)?;
-            Ok(())
-        } else {
-            Err(BadRequest(StrError::new("test")))
+        if !any {
+            return Err(BadRequest(StrError::new("request does not contain any valid fields for update in JSON body")));
         }
-    }
-}
 
-type OptionalColumn<'a> = Option<(String, Box<dyn Display + 'a>)>;
+        query_builder.push(" WHERE (id) = ");
+        query_builder.push_bind(id.0);
 
-fn opt_col_new<'a, T: Display>(name: &str, option: &'a Option<T>)
-    -> OptionalColumn<'a> {
-    match option {
-        Some(val) => Some((name.to_string(), Box::new(val))),
-        None => None,
-    }
-}
-
-fn get_set_query_string_from_options(
-    options: Vec<OptionalColumn>) -> Option<String> {
-    let mut query_string = "SET ".to_string();
-    let mut any = false;
-    for option in options {
-        if let Some((name, val)) = option {
-            if any {
-                query_string.write_str(", ").unwrap()
-            };
-            write!(query_string, "({name}) = \"{val}\"").unwrap();
-            any = true;
-        }
-    }
-    if any {
-        Some(query_string)
-    } else {
-        None
+        query_builder.build()
+            .execute(pool.0)
+            .await
+            .map_err(InternalServerError)?;
+        Ok(())
     }
 }
