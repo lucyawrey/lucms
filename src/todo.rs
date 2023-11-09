@@ -72,8 +72,8 @@ impl TodosApi {
         ]);
 
         if let Some(set_query_string) = query_string_option {
-            sqlx::query("UPDATE todos ? WHERE (id) = ?")
-                .bind(set_query_string)
+            let sql = format!("UPDATE todos {set_query_string} WHERE (id) = ?");
+            sqlx::query(&sql)
                 .bind(id.0)
                 .execute(pool.0)
                 .await
