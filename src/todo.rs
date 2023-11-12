@@ -22,7 +22,7 @@ pub struct TodosApi;
 
 #[OpenApi]
 impl TodosApi {
-    #[oai(path = "/todo", method = "post")]
+    #[oai(path = "/todos", method = "post")]
     async fn create(
         &self,
         pool: Data<&SqlitePool>,
@@ -63,7 +63,7 @@ impl TodosApi {
     }
 
 
-    #[oai(path = "/todo", method = "get")]
+    #[oai(path = "/todos", method = "get")]
     async fn get_all(
         &self,
         pool: Data<&SqlitePool>
