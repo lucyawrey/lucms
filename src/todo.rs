@@ -1,7 +1,7 @@
 use poem::{error::{InternalServerError, BadRequest}, Result, web::Data};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object, param::Path};
 use sqlx::{SqlitePool, QueryBuilder, Sqlite};
-use crate::utilities::StrError;
+use crate::utilities::{StrError, QueryBuilderOverrides, SeparatedOverrides};
 
 /// Todo
 #[derive(Object)]
@@ -93,7 +93,7 @@ impl TodosApi {
     }
 
     #[oai(path = "/todos/:id", method = "put")]
-    async fn update(
+    async fn update2(
         &self,
         pool: Data<&SqlitePool>,
         id: Path<i64>,
@@ -104,24 +104,13 @@ impl TodosApi {
         }
 
         let mut query_builder: QueryBuilder<Sqlite> =
-            QueryBuilder::new("UPDATE todos SET ");
+            QueryBuilder::new("UPDATE todos ")
+            .push_option(update.description.to_owned(), "description")
+            .push_option(update.done, "done");
 
-        if let Some(description) = &update.description {
-            query_builder.push("(description) = ");
-            query_builder.push_bind(description);
-        }
-        if update.description.is_some() && update.done.is_some() {
-            query_builder.push(", ");
-        }
-        if let Some(done) = &update.done {
-            query_builder.push("(done) = ");
-            query_builder.push_bind(done);
-        }
-
-        query_builder.push(" WHERE (id) = ");
-        query_builder.push_bind(id.0);
-
-        query_builder.build()
+        query_builder.push("WHERE (id) = ")
+            .push_bind(id.0)
+            .build()
             .execute(pool.0)
             .await
             .map_err(InternalServerError)?;
