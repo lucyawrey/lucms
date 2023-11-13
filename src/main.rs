@@ -1,16 +1,14 @@
-mod hello;
 mod todo;
 mod utilities;
 mod query_builder;
 
-use hello::HelloApi;
 use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint, handler, get};
 use poem_openapi::OpenApiService;
 use sqlx::SqlitePool;
 use todo::TodosApi;
 use std::{error::Error, env};
 
-const API_SET: (HelloApi, TodosApi) = (HelloApi, TodosApi);
+const API_SET: TodosApi = TodosApi;
 
 #[tokio::main]
 async fn main()
