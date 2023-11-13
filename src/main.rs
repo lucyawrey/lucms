@@ -1,6 +1,7 @@
 mod hello;
 mod todo;
 mod utilities;
+mod query_builder;
 
 use hello::HelloApi;
 use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint, handler, get};

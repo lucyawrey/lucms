@@ -1,7 +1,8 @@
 use poem::{error::{InternalServerError, BadRequest}, Result, web::Data};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object, param::Path};
-use sqlx::{SqlitePool, QueryBuilder, Sqlite};
-use crate::utilities::{StrError, QueryBuilderOverrides, SeparatedOverrides};
+use sqlx::{SqlitePool, QueryBuilder};
+use crate::utilities::StrError;
+use crate::query_builder::{QueryBuilderExtension, SeparatedExtension};
 
 /// Todo
 #[derive(Object)]
@@ -103,12 +104,13 @@ impl TodosApi {
             return Err(BadRequest(StrError::new("request does not contain any valid fields for update in JSON body")));
         }
 
-        let mut query_builder: QueryBuilder<Sqlite> =
-            QueryBuilder::new("UPDATE todos ")
-            .push_option(update.description.to_owned(), "description")
+        let mut query_builder =
+            QueryBuilder::new("UPDATE todos SET ");
+        
+        query_builder.push_option(update.description.to_owned(), "description")
             .push_option(update.done, "done");
 
-        query_builder.push("WHERE (id) = ")
+        query_builder.push(" WHERE (id) = ")
             .push_bind(id.0)
             .build()
             .execute(pool.0)
