@@ -1,6 +1,6 @@
 use poem::{error::{InternalServerError, BadRequest}, Result, web::Data};
 use poem_openapi::{OpenApi, payload::{PlainText, Json}, Object, param::Path};
-use sqlx::{SqlitePool, QueryBuilder};
+use sqlx::{postgres::PgPool, QueryBuilder};
 use crate::utilities::StrError;
 use crate::query_builder::{QueryBuilderExtension, SeparatedExtension};
 
@@ -26,11 +26,11 @@ impl TodosApi {
     #[oai(path = "/todos", method = "post")]
     async fn create(
         &self,
-        pool: Data<&SqlitePool>,
+        pool: Data<&PgPool>,
         description: PlainText<String>,
     ) -> Result<Json<i64>> {
         let id = sqlx::query!(
-	        "INSERT INTO todos (description) VALUES (?)",
+	        "INSERT INTO todos (description) VALUES ($1)",
             description.0
 		)
 		.execute(pool.0)
@@ -42,12 +42,12 @@ impl TodosApi {
     }
 
     #[oai(path = "/todos/:id", method = "get")]
-    async fn get(&self, pool: Data<&SqlitePool>, id: Path<i64>)
+    async fn get(&self, pool: Data<&PgPool>, id: Path<i64>)
         -> Result<Json<Todo>> {
         let todo: Option<Todo> =
             sqlx::query_as!(
                 Todo,
-                "SELECT * from todos WHERE (id) = (?)",
+                "SELECT * from todos WHERE (id) = ($1)",
                 id.0
             )
                 .fetch_optional(pool.0)
@@ -67,7 +67,7 @@ impl TodosApi {
     #[oai(path = "/todos", method = "get")]
     async fn get_all(
         &self,
-        pool: Data<&SqlitePool>
+        pool: Data<&PgPool>
     ) -> Result<Json<Vec<Todo>>> {
         let todos = sqlx::query_as!(
 	        Todo, 
@@ -81,10 +81,10 @@ impl TodosApi {
     }
 
     #[oai(path = "/todos/:id", method = "delete")]
-    async fn delete(&self, pool: Data<&SqlitePool>, id: Path<i64>)
+    async fn delete(&self, pool: Data<&PgPool>, id: Path<i64>)
         -> Result<()> {
         sqlx::query!(
-            "DELETE from todos where (id) = (?)",
+            "DELETE from todos where (id) = ($1)",
             id.0
         )
             .execute(pool.0)
@@ -96,7 +96,7 @@ impl TodosApi {
     #[oai(path = "/todos/:id", method = "put")]
     async fn update2(
         &self,
-        pool: Data<&SqlitePool>,
+        pool: Data<&PgPool>,
         id: Path<i64>,
         update: Json<UpdateTodo>,
     ) -> Result<()> {

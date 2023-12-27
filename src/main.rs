@@ -4,7 +4,7 @@ mod query_builder;
 
 use poem::{listener::TcpListener, Route, Server, EndpointExt, web::Redirect, endpoint::StaticFilesEndpoint, handler, get};
 use poem_openapi::OpenApiService;
-use sqlx::SqlitePool;
+use sqlx::postgres::PgPoolOptions;
 use todo::TodosApi;
 use std::{error::Error, env};
 
@@ -20,8 +20,9 @@ async fn main()
     let database_url = env::var("DATABASE_URL").expect("Enviornment variable DATABASE_URL not found.");
     let host = env::var("HOST").expect("Enviornment variable HOST not found.");
 
-    let db_pool = 
-	    SqlitePool::connect(&database_url).await?;
+    let db_pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_url).await?;
 
     let api_service =
         OpenApiService::new(API_SET, "LuCMS API (in R&D phase)", "1.0.0")
