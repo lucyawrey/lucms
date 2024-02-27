@@ -1,4 +1,4 @@
--- Initial Migration for Creating Empty Database
+-- Initial Migration for Creating Empty Database tables
 
 -- Testing Purposes
 CREATE TABLE todos (

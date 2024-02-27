@@ -6,16 +6,13 @@ services:
     image: postgres
     restart: always
     environment:
+      #POSTGRES_DB: lucmsdev
       POSTGRES_USER: pguser
       POSTGRES_PASSWORD: pgdevpassword
-      #POSTGRES_DB: lucmsdev
     volumes:
-      - ./db/postgresql:/var/lib/postgresql
+      - lucms-postgres:/var/lib/postgresql/data
     ports:
-      - '5432:5432'
+      - '5433:5433'
 
-  adminer:
-    image: adminer
-    restart: always
-    ports:
-      - 8080:8080
+volumes:
+  lucms-postgres:

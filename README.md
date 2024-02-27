@@ -12,7 +12,7 @@ Experimental Rust-based headless CMS.
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 - Clone the repo.
-- Follow the steps SQLx setup steps below to make sure you have a working `lucms.db` SQLite file.
+- Follow the SQLx setup steps below to make sure you have a working PostgreSQL database.
 - Make sure you have a `.env` file containing the variables `DATABASE_URL` and `HOST` or else the program won't run. As of now, this is checked in as it contains no secrets.
 - Run `cargo run` to start the project.
 
@@ -26,11 +26,6 @@ sudo apt-get install libssl-dev
 Next, install the SQLx CLI with Cargo if you don't already have it:
 ```sh
 cargo install sqlx-cli
-```
-
-Create an empty `lucms.db` database file:
-```sh
-sqlx database create
 ```
 
 Run migrations to create and properly configure necessary tables:
